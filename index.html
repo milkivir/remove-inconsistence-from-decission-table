@@ -1,0 +1,254 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Table</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='moj_styl.css') }}">
+
+</head>
+<body>
+
+
+	<form method="post" enctype="multipart/form-data" class="form">
+		<input type="file" name="file" accept=".csv" required>
+		<button type="submit" class="button">Upload File</button>
+	</form>
+
+    {% if data %}
+        {{ data|safe }}
+    {% endif %}
+
+<div class="table-container">
+    <div>
+        <h3>First 5 rows of your decision table:</h3>
+        {% if table is defined %}
+		
+        <table class="table">
+        <thead>
+            <tr>
+                {% for col in table.columns %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table.values %}
+                <tr>
+                    {% for value in row %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+		</table>
+		{% else %}
+		<p>No table data available.</p>
+       {% endif %}
+    </div>
+	<div>
+    <h3>Decision Table Information</h3>
+    <p>Number of Rows: {{ num_rows }}</p>
+    <p>Number of Attributes: {{ num_columns }}</p>
+	<p>Is table inconsistent? (Yes/No): {{ inconsistent_exist }}</p>
+	<p>Number of inconsistent rows: {{ inconsistent_rows }}</p>
+    </div>
+</div>	
+	<p>
+
+	<div class="table-container">
+	
+	<table  class="table">
+		<tr>	
+			<td colspan="2"><b>Inconsistencies removed using the 1st method:</b>	
+		</tr>
+		<tr>	
+			<td><b>Number of rows</b></td>
+			<td>{{ num_rows_clean_m1 }}</td>	
+		</tr>
+		<tr>
+			<th><b>Train-Test</b></th>
+			<th><b><center>RESULTS</center></b></th>
+			
+		</tr>
+		<tr>
+			<td>Depth</td>
+			<td><center>{{ depth_m1_train_test }}</center></td>
+		</tr>
+				<tr>
+			<td>Number of nodes</td>
+			<td><center>{{ nodes_m1_train_test }}</center></td>
+		</tr>
+		<tr>
+			<td>Accuracy</td>
+			<td><center>{{ accuracy_m1_tt }}</center></td>
+		</tr>
+		<tr>
+			<th><b>K-fold cross validation</b></th>
+			<th><b><center>RESULTS</center></b></th>
+		</tr>
+		<tr>
+			<td>Split 1 - depth</td>
+			<td><center>{{ depth_m1_split1 }}</center></td>
+		</tr>
+		<tr>
+			<td>Split 1 - Number of nodes</td>
+			<td><center>{{ node_m1_split1 }}</center></td>
+		</tr>
+		<tr class="split-row">
+			<td>Split 1 - Accuracy</td>
+			<td><center>{{ accuracy_m1_split1 }}</center></td>
+		</tr>	
+		<tr>
+			<td>Split 2 - depth</td>
+			<td><center>{{ depth_m1_split2 }}</center></td>
+		</tr>
+		<tr>
+			<td>Split 2 - Number of nodes</td>
+			<td><center>{{ node_m1_split2 }}</center></td>
+		</tr>
+		<tr class="split-row">
+			<td>Split 2 - Accuracy</td>
+			<td><center>{{ accuracy_m1_split2 }}</center></td>
+		</tr>			
+		<tr>
+			<td>Split 3 - depth</td>
+			<td><center>{{ depth_m1_split3 }}</center></td>
+		</tr>
+		<tr>
+			<td>Split 3 - Number of nodes</td>
+			<td><center>{{ node_m1_split3 }}</center></td>
+		</tr>
+		<tr class="split-row">
+			<td>Split 3 - Accuracy</td>
+			<td><center>{{ accuracy_m1_split3 }}</center></td>
+		</tr>	
+		<tr>
+			<td>Split 4 - depth</td>
+			<td><center>{{ depth_m1_split4 }}</center></td>
+		</tr>
+		<tr>
+			<td>Split 4 - Number of nodes</td>
+			<td><center>{{ node_m1_split4 }}</center></td>
+		</tr>
+		<tr class="split-row">
+			<td>Split 4 - Accuracy</td>
+			<td><center>{{ accuracy_m1_split4 }}</center></td>
+		</tr>
+		<tr>
+			<td>Split 5 - depth</td>
+			<td><center>{{ depth_m1_split5 }}</center></td>
+		</tr>	
+		<tr>
+			<td>Split 5 - Number of nodes</td>
+			<td><center>{{ node_m1_split5 }}</center></td>
+		</tr>
+		<tr class="split-row">
+			<td>Split 5 - Accuracy</td>
+			<td><center>{{ accuracy_m1_split5 }}</center></td>
+		</tr>		
+		<tr>
+			<td>Average Accuracy for 5 splits</td>
+			<td><center>{{ average_accuracy_m1_kf }}</center></td>
+		</tr>	
+	</table>
+
+	<table  class="table">
+		<tr>	
+			<td colspan="2"><b>Inconsistencies removed using the 2nd method:</b>	
+		</tr>
+		<tr>	
+			<td><b>Number of rows</b></td>
+			<td>{{ num_rows_clean_m2 }}</td>	
+		</tr>
+		<tr>
+			<th><b>Train-Test</b></th>
+			<th><b><center>RESULTS</center></b></th>
+		</tr>
+		<tr>
+			<td>Depth</td>
+			<td><center>{{ depth_m2_train_test }}</center></td>
+		</tr>
+		<tr>
+			<td>Number of nodes</td>
+			<td><center>{{ nodes_m2_train_test }}</center></td>
+		</tr>
+		<tr>
+			<td>Accuracy</td>
+			<td><center>{{ accuracy_m2_tt }}</center></td>
+		</tr>
+		<tr>
+			<th><b>K-fold cross validation</b></th>
+			<th><b><center>RESULTS</center></b></th>
+		</tr>
+		<tr>
+			<td>Split 1 - depth</td>
+			<td><center>{{ depth_m2_split1 }}</center></td>
+		</tr>
+		<tr>
+			<td>Split 1 - Number of nodes</td>
+			<td><center>{{ node_m2_split1 }}</center></td>
+		</tr>
+		<tr class="split-row">
+			<td>Split 1 - Accuracy</td>
+			<td><center>{{ accuracy_m2_split1 }}</center></td>
+		</tr>	
+		<tr>
+			<td>Split 2 - depth</td>
+			<td><center>{{ depth_m2_split2 }}</center></td>
+		</tr>
+		<tr>
+			<td>Split 2 - Number of nodes</td>
+			<td><center>{{ node_m2_split2 }}</center></td>
+		</tr>
+		<tr class="split-row">
+			<td>Split 2 - Accuracy</td>
+			<td><center>{{ accuracy_m2_split2 }}</center></td>
+		</tr>			
+		<tr>
+			<td>Split 3 - depth</td>
+			<td><center>{{ depth_m2_split3 }}</center></td>
+		</tr>
+		<tr>
+			<td>Split 3 - Number of nodes</td>
+			<td><center>{{ node_m2_split3 }}</center></td>
+		</tr>
+		<tr class="split-row">
+			<td>Split 3 - Accuracy</td>
+			<td><center>{{ accuracy_m2_split3 }}</center></td>
+		</tr>	
+		<tr>
+			<td>Split 4 - depth</td>
+			<td><center>{{ depth_m2_split4 }}</center></td>
+		</tr>
+		<tr>
+			<td>Split 4 - Number of nodes</td>
+			<td><center>{{ node_m2_split4 }}</center></td>
+		</tr>
+		<tr class="split-row">
+			<td>Split 4 - Accuracy</td>
+			<td><center>{{ accuracy_m2_split4 }}</center></td>
+		</tr>
+		<tr>
+			<td>Split 5 - depth</td>
+			<td><center>{{ depth_m2_split5 }}</center></td>
+		</tr>	
+		<tr>
+			<td>Split 5 - Number of nodes</td>
+			<td><center>{{ node_m2_split5 }}</center></td>
+		</tr>
+		<tr class="split-row">
+			<td>Split 5 - Accuracy</td>
+			<td><center>{{ accuracy_m2_split5 }}</center></td>
+		</tr>		
+		<tr>
+			<td>Average Accuracy for 5 splits</td>
+			<td><center>{{ average_accuracy_m2_kf }}</center></td>
+		</tr>	
+	</table>
+	</div>
+	
+	<p><p>
+</body>
+</html>
