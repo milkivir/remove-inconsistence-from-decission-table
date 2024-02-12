@@ -1,0 +1,72 @@
+/* moj_styl.css */
+
+body {
+    background-color: #f2f2f2; /* Grey background color */
+    font-family: 'Calibri', sans-serif; /* Calibri font */
+}
+
+form {
+    margin-top: 20px; /* Adjust the top margin to your preference */
+}
+
+form input[type="file"] {
+    padding: 10px; /* Adjust padding as needed */
+    border: 2px solid #4CAF50; /* Green button color */
+    border-radius: 5px; /* Rounded corners */
+    margin-right: 10px; /* Add some spacing between the file input and the button */
+}
+
+/* Adjust the style of the submit button within the form */
+form .button {
+    padding: 10px 20px;
+    background-color: #4CAF50; /* Green button color */
+    color: white;
+    border: 1px solid #4CAF50;
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4CAF50; /* Green button color */
+    color: white;
+    border: 1px solid #4CAF50;
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+}
+
+.table-container {
+    display: flex;
+    justify-content: center; /* Center tables horizontally */
+    align-items: flex-start; /* Align tables to the top */
+}
+
+.table-container > div {
+    width: 20%; /* Adjust the width based on your design */
+    margin: 0 10px; /* Add some margin between the tables */
+}
+
+.table {
+    width: 30%;
+    border-collapse: collapse;
+    margin-top: 20px;
+	margin-right: 2%; 
+	margin-left: 2%; 
+	margin-bottom: 50px;
+}
+
+.table tr.split-row {
+    border-bottom: 2px solid #4CAF50; /* Adjust the color and thickness as needed */
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #4CAF50;
+    color: white;
+}
