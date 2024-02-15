@@ -38,14 +38,32 @@ def index():
             # Get the last column
             last_column = decision_table.columns[-1]
             
-            # Check for conflicting rules
-            inconsistent_rows = decision_table[decision_table.duplicated(columns_to_check, keep=False)]
+            # Check for duplicated rows
+            duplicated_rows = decision_table[decision_table.duplicated(columns_to_check, keep=False)]
+            #Get the number of rows in clean_decision_table_m1
+            num_duplicated_rows = duplicated_rows.shape[0]
+            
+            # Initialize a list to store inconsistent rows
+            inconsistent_rows_f = []
+            
+            for _, group in duplicated_rows.groupby(columns_to_check.tolist()):
+                unique_decisions = group[last_column].unique()
+
+                if len(unique_decisions) > 1:
+                    # If there are different values in last_column, it's inconsistent
+                    inconsistent_rows_f.append(group)
+            
+            if inconsistent_rows_f:    
+            # Concatenate the inconsistent rows into a DataFrame
+                inconsistent_rows = pd.concat(inconsistent_rows_f)
             
             if not inconsistent_rows.empty:
                 inconsistent_exist = "Yes"
 
                 # Remove inconsistent rows from the original DataFrame - method 1
                 clean_decision_table_m1 = decision_table.drop(inconsistent_rows.index)
+                # Remove duplicate rows, keeping only the first occurrence
+                clean_decision_table_m1 = clean_decision_table_m1.drop_duplicates(columns_to_check)
                 #Get the number of rows in clean_decision_table_m1
                 num_rows_clean_m1 = clean_decision_table_m1.shape[0]
 
@@ -258,7 +276,7 @@ def index():
             # Pass the data to the template
             table_data = decision_table.head(5)
             if not table_data.empty:
-                return render_template('index.html', num_rows=num_rows, num_columns=num_columns, table=table_data, inconsistent_rows=len(inconsistent_rows), inconsistent_exist=inconsistent_exist, depth_m1_train_test=depth_m1_train_test, nodes_m1_train_test=nodes_m1_train_test, accuracy_m1_tt=accuracy_m1_tt, average_accuracy_m1_kf=average_accuracy_m1_kf, depth_m1_split1 = depth_m1_split1, depth_m1_split2=depth_m1_split2, depth_m1_split3=depth_m1_split3, depth_m1_split4=depth_m1_split4, depth_m1_split5=depth_m1_split5, node_m1_split1=node_m1_split1, node_m1_split2=node_m1_split2, node_m1_split3=node_m1_split3, node_m1_split4=node_m1_split4, node_m1_split5=node_m1_split5, accuracy_m1_split1=accuracy_m1_split1, accuracy_m1_split2=accuracy_m1_split2, accuracy_m1_split3=accuracy_m1_split3, accuracy_m1_split4=accuracy_m1_split4, accuracy_m1_split5=accuracy_m1_split5, depth_m2_train_test=depth_m2_train_test, nodes_m2_train_test=nodes_m2_train_test, accuracy_m2_tt=accuracy_m2_tt, average_accuracy_m2_kf=average_accuracy_m2_kf, depth_m2_split1 = depth_m2_split1, depth_m2_split2=depth_m2_split2, depth_m2_split3=depth_m2_split3, depth_m2_split4=depth_m2_split4, depth_m2_split5=depth_m2_split5, node_m2_split1=node_m2_split1, node_m2_split2=node_m2_split2, node_m2_split3=node_m2_split3, node_m2_split4=node_m2_split4, node_m2_split5=node_m2_split5, accuracy_m2_split1=accuracy_m2_split1, accuracy_m2_split2=accuracy_m2_split2, accuracy_m2_split3=accuracy_m2_split3, accuracy_m2_split4=accuracy_m2_split4, accuracy_m2_split5=accuracy_m2_split5, num_rows_clean_m1=num_rows_clean_m1, num_rows_clean_m2=num_rows_clean_m2)
+                return render_template('index.html', num_duplicated_rows=num_duplicated_rows, num_rows=num_rows, num_columns=num_columns, table=table_data, inconsistent_rows=len(inconsistent_rows), inconsistent_exist=inconsistent_exist, depth_m1_train_test=depth_m1_train_test, nodes_m1_train_test=nodes_m1_train_test, accuracy_m1_tt=accuracy_m1_tt, average_accuracy_m1_kf=average_accuracy_m1_kf, depth_m1_split1 = depth_m1_split1, depth_m1_split2=depth_m1_split2, depth_m1_split3=depth_m1_split3, depth_m1_split4=depth_m1_split4, depth_m1_split5=depth_m1_split5, node_m1_split1=node_m1_split1, node_m1_split2=node_m1_split2, node_m1_split3=node_m1_split3, node_m1_split4=node_m1_split4, node_m1_split5=node_m1_split5, accuracy_m1_split1=accuracy_m1_split1, accuracy_m1_split2=accuracy_m1_split2, accuracy_m1_split3=accuracy_m1_split3, accuracy_m1_split4=accuracy_m1_split4, accuracy_m1_split5=accuracy_m1_split5, depth_m2_train_test=depth_m2_train_test, nodes_m2_train_test=nodes_m2_train_test, accuracy_m2_tt=accuracy_m2_tt, average_accuracy_m2_kf=average_accuracy_m2_kf, depth_m2_split1 = depth_m2_split1, depth_m2_split2=depth_m2_split2, depth_m2_split3=depth_m2_split3, depth_m2_split4=depth_m2_split4, depth_m2_split5=depth_m2_split5, node_m2_split1=node_m2_split1, node_m2_split2=node_m2_split2, node_m2_split3=node_m2_split3, node_m2_split4=node_m2_split4, node_m2_split5=node_m2_split5, accuracy_m2_split1=accuracy_m2_split1, accuracy_m2_split2=accuracy_m2_split2, accuracy_m2_split3=accuracy_m2_split3, accuracy_m2_split4=accuracy_m2_split4, accuracy_m2_split5=accuracy_m2_split5, num_rows_clean_m1=num_rows_clean_m1, num_rows_clean_m2=num_rows_clean_m2)
 
     return render_template('index.html')
 
