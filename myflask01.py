@@ -1,17 +1,27 @@
 # add label encoding for tables
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 import pandas as pd
 import numpy as np  # Import numpy for random seed
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import KFold
+import io
+from io import BytesIO
 
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    global clean_decision_table_m1
+    global clean_decision_table_m2
+    cv_splits_m1 = 5
+    
     if request.method == 'POST':
+        
+        if 'cv_splits_m1' in request.form:
+            cv_splits_m1 = int(request.form['cv_splits_m1'])
+            
         # Check if a file was uploaded
         if 'file' not in request.files:
             return redirect(request.url)
@@ -99,7 +109,7 @@ def index():
             y_m1 = clean_decision_table_m1[last_column]
             
             # Split the data into train and test sets for method 1
-            X_train_m1, X_test_m1, y_train_m1, y_test_m1 = train_test_split(X_m1, y_m1, test_size=0.2)
+            X_train_m1, X_test_m1, y_train_m1, y_test_m1 = train_test_split(X_m1, y_m1, test_size=0.25)
 
             # Train a decision tree classifier for method 1
             clf_m1 = DecisionTreeClassifier()
@@ -115,7 +125,12 @@ def index():
             # METHOD 1 - K-FOLD
             
             average_accuracy_m1_kf = 0.0
-            cv_splits_m1 = min(5, len(X_m1))
+            
+            if num_rows_clean_m1 < 10 and cv_splits_m1==10:
+                cv_splits_m1=5
+            elif num_rows_clean_m1 < 5 and (cv_splits_m1==5 or cv_splits_m1==10):    
+                cv_splits_m1 = min(5, len(X_m1))
+            
             if cv_splits_m1 >= 5:
                 cv_m1 = KFold(n_splits=cv_splits_m1, shuffle=True)
 
@@ -144,45 +159,19 @@ def index():
                     nodes_m1_splits.append(nodes_m1_split)
                     accuracies_m1_splits.append(accuracy_m1_split)
                 
-                depth_m1_split1 = depths_m1_splits[0]   
-                depth_m1_split2 = depths_m1_splits[1]   
-                depth_m1_split3 = depths_m1_splits[2]   
-                depth_m1_split4 = depths_m1_splits[3]   
-                depth_m1_split5 = depths_m1_splits[4]
-                node_m1_split1 = nodes_m1_splits[0]   
-                node_m1_split2 = nodes_m1_splits[1]   
-                node_m1_split3 = nodes_m1_splits[2]   
-                node_m1_split4 = nodes_m1_splits[3]   
-                node_m1_split5 = nodes_m1_splits[4]
-                accuracy_m1_split1 = round(accuracies_m1_splits[0], 2)   
-                accuracy_m1_split2 = round(accuracies_m1_splits[1], 2)   
-                accuracy_m1_split3 = round(accuracies_m1_splits[2], 2)   
-                accuracy_m1_split4 = round(accuracies_m1_splits[3], 2)   
-                accuracy_m1_split5 = round(accuracies_m1_splits[4], 2)   
-                
-                
                 # Get the average accuracy across all splits
+                average_depth_m1_kf = round(sum(depths_m1_splits) / cv_splits_m1, 2)
+                average_nodes_m1_kf = round(sum(nodes_m1_splits) / cv_splits_m1, 2)
                 average_accuracy_m1_kf = round(sum(accuracies_m1_splits) / cv_splits_m1, 2)
                 
 
             else:
-                depth_m1_split1 = 0
-                depth_m1_split2 = 0
-                depth_m1_split3 = 0
-                depth_m1_split4 = 0
-                depth_m1_split5 = 0
-                node_m1_split1 = 0
-                node_m1_split2 = 0
-                node_m1_split3 = 0
-                node_m1_split4 = 0
-                node_m1_split5 = 0
-                accuracy_m1_split1 = 0.0
-                accuracy_m1_split2 = 0.0
-                accuracy_m1_split3 = 0.0
-                accuracy_m1_split4 = 0.0
-                accuracy_m1_split5 = 0.0
-                average_accuracy_m1_kf = 0.0
-
+                depths_m1_splits = [0]*cv_splits_m1
+                nodes_m1_splits = [0]*cv_splits_m1
+                accuracies_m1_splits = [0]*cv_splits_m1
+                
+            std_accuracy_m1_kf = round(np.std(accuracies_m1_splits), 2)
+                
             # METHOD 2 - TRAIN-TEST
             
             # Features (X) are columns_to_check, and the label (y) is last_column
@@ -190,7 +179,7 @@ def index():
             y_m2 = clean_decision_table_m2[last_column]
             
             # Split the data into train and test sets for METHOD 2
-            X_train_m2, X_test_m2, y_train_m2, y_test_m2 = train_test_split(X_m2, y_m2, test_size=0.2)
+            X_train_m2, X_test_m2, y_train_m2, y_test_m2 = train_test_split(X_m2, y_m2, test_size=0.25)
 
             # Train a decision tree classifier for METHOD 2
             clf_m2 = DecisionTreeClassifier()
@@ -206,9 +195,14 @@ def index():
             # METHOD 2 - K-FOLD
             
             average_accuracy_m2_kf = 0.0
-            cv_splits_m2 = min(5, len(X_m2))
-            if cv_splits_m2 >= 5:
-                cv_m2 = KFold(n_splits=cv_splits_m2, shuffle=True)
+            
+            if num_rows_clean_m2 < 10 and cv_splits_m1==10:
+                cv_splits_m1=5
+            elif num_rows_clean_m2 < 5 and (cv_splits_m1==5 or cv_splits_m1==10):    
+                cv_splits_m1 = min(5, len(X_m2))
+
+            if cv_splits_m1 >= 5:
+                cv_m2 = KFold(n_splits=cv_splits_m1, shuffle=True)
 
                 # Create a decision tree classifier for METHOD 2
                 clf_m2 = DecisionTreeClassifier()
@@ -234,51 +228,40 @@ def index():
                     depths_m2_splits.append(depth_m2_split)
                     nodes_m2_splits.append(nodes_m2_split)
                     accuracies_m2_splits.append(accuracy_m2_split)
-                
-                depth_m2_split1 = depths_m2_splits[0]   
-                depth_m2_split2 = depths_m2_splits[1]   
-                depth_m2_split3 = depths_m2_splits[2]   
-                depth_m2_split4 = depths_m2_splits[3]   
-                depth_m2_split5 = depths_m2_splits[4]
-                node_m2_split1 = nodes_m2_splits[0]   
-                node_m2_split2 = nodes_m2_splits[1]   
-                node_m2_split3 = nodes_m2_splits[2]   
-                node_m2_split4 = nodes_m2_splits[3]   
-                node_m2_split5 = nodes_m2_splits[4]
-                accuracy_m2_split1 = round(accuracies_m2_splits[0], 2)   
-                accuracy_m2_split2 = round(accuracies_m2_splits[1], 2)   
-                accuracy_m2_split3 = round(accuracies_m2_splits[2], 2)   
-                accuracy_m2_split4 = round(accuracies_m2_splits[3], 2)   
-                accuracy_m2_split5 = round(accuracies_m2_splits[4], 2)   
-                
-                
+        
                 # Get the average accuracy across all splits
-                average_accuracy_m2_kf = round(sum(accuracies_m2_splits) / cv_splits_m2, 2)
+                average_depth_m2_kf = round(sum(depths_m2_splits) / cv_splits_m1, 2)
+                average_nodes_m2_kf = round(sum(nodes_m2_splits) / cv_splits_m1, 2)
+                average_accuracy_m2_kf = round(sum(accuracies_m2_splits) / cv_splits_m1, 2)
                 
             else:
-                depth_m2_split1 = 0
-                depth_m2_split2 = 0
-                depth_m2_split3 = 0
-                depth_m2_split4 = 0
-                depth_m2_split5 = 0
-                node_m2_split1 = 0
-                node_m2_split2 = 0
-                node_m2_split3 = 0
-                node_m2_split4 = 0
-                node_m2_split5 = 0
-                accuracy_m2_split1 = 0.0
-                accuracy_m2_split2 = 0.0
-                accuracy_m2_split3 = 0.0
-                accuracy_m2_split4 = 0.0
-                accuracy_m2_split5 = 0.0
-                average_accuracy_m2_kf = 0.0
-
+                depths_m2_splits = [0]*cv_splits_m1
+                nodes_m2_splits = [0]*cv_splits_m1
+                accuracies_m2_splits = [0]*cv_splits_m1
+            
+            std_accuracy_m2_kf = round(np.std(accuracies_m2_splits), 2)    
             # Pass the data to the template
             table_data = decision_table.head(5)
             if not table_data.empty:
-                return render_template('index.html', num_duplicated_rows=num_duplicated_rows, num_rows=num_rows, num_columns=num_columns, table=table_data, inconsistent_rows=len(inconsistent_rows), inconsistent_exist=inconsistent_exist, depth_m1_train_test=depth_m1_train_test, nodes_m1_train_test=nodes_m1_train_test, accuracy_m1_tt=accuracy_m1_tt, average_accuracy_m1_kf=average_accuracy_m1_kf, depth_m1_split1 = depth_m1_split1, depth_m1_split2=depth_m1_split2, depth_m1_split3=depth_m1_split3, depth_m1_split4=depth_m1_split4, depth_m1_split5=depth_m1_split5, node_m1_split1=node_m1_split1, node_m1_split2=node_m1_split2, node_m1_split3=node_m1_split3, node_m1_split4=node_m1_split4, node_m1_split5=node_m1_split5, accuracy_m1_split1=accuracy_m1_split1, accuracy_m1_split2=accuracy_m1_split2, accuracy_m1_split3=accuracy_m1_split3, accuracy_m1_split4=accuracy_m1_split4, accuracy_m1_split5=accuracy_m1_split5, depth_m2_train_test=depth_m2_train_test, nodes_m2_train_test=nodes_m2_train_test, accuracy_m2_tt=accuracy_m2_tt, average_accuracy_m2_kf=average_accuracy_m2_kf, depth_m2_split1 = depth_m2_split1, depth_m2_split2=depth_m2_split2, depth_m2_split3=depth_m2_split3, depth_m2_split4=depth_m2_split4, depth_m2_split5=depth_m2_split5, node_m2_split1=node_m2_split1, node_m2_split2=node_m2_split2, node_m2_split3=node_m2_split3, node_m2_split4=node_m2_split4, node_m2_split5=node_m2_split5, accuracy_m2_split1=accuracy_m2_split1, accuracy_m2_split2=accuracy_m2_split2, accuracy_m2_split3=accuracy_m2_split3, accuracy_m2_split4=accuracy_m2_split4, accuracy_m2_split5=accuracy_m2_split5, num_rows_clean_m1=num_rows_clean_m1, num_rows_clean_m2=num_rows_clean_m2)
+                return render_template('index.html', num_duplicated_rows=num_duplicated_rows, num_rows=num_rows, num_columns=num_columns, table=table_data, inconsistent_rows=len(inconsistent_rows), inconsistent_exist=inconsistent_exist, depth_m1_train_test=depth_m1_train_test, nodes_m1_train_test=nodes_m1_train_test, accuracy_m1_tt=accuracy_m1_tt, average_accuracy_m1_kf=average_accuracy_m1_kf, depths_m1_splits=depths_m1_splits, nodes_m1_splits=nodes_m1_splits, accuracies_m1_splits=accuracies_m1_splits, average_depth_m1_kf=average_depth_m1_kf, average_nodes_m1_kf=average_nodes_m1_kf, depth_m2_train_test=depth_m2_train_test, nodes_m2_train_test=nodes_m2_train_test, accuracy_m2_tt=accuracy_m2_tt, average_accuracy_m2_kf=average_accuracy_m2_kf, depths_m2_splits=depths_m2_splits, nodes_m2_splits=nodes_m2_splits, accuracies_m2_splits=accuracies_m2_splits, average_depth_m2_kf=average_depth_m2_kf,  average_nodes_m2_kf=average_nodes_m2_kf, num_rows_clean_m1=num_rows_clean_m1, num_rows_clean_m2=num_rows_clean_m2, cv_splits_m1=cv_splits_m1, std_accuracy_m1_kf=std_accuracy_m1_kf, std_accuracy_m2_kf=std_accuracy_m2_kf)
 
     return render_template('index.html')
+
+@app.route('/download_csv_m1')
+def download_csv_m1():
+    global clean_decision_table_m1
+    csv_io_m1 = BytesIO()
+    clean_decision_table_m1.to_csv(csv_io_m1, index=False, encoding='utf-8')
+    csv_io_m1.seek(0)
+    return send_file(csv_io_m1, mimetype='text/csv', as_attachment=True, download_name='data_m1.csv')
+
+@app.route('/download_csv_m2')
+def download_csv_m2():
+    global clean_decision_table_m2
+    csv_io_m2 = BytesIO()
+    clean_decision_table_m2.to_csv(csv_io_m2, index=False, encoding='utf-8')
+    csv_io_m2.seek(0)
+    return send_file(csv_io_m2, mimetype='text/csv', as_attachment=True, download_name='data_m2.csv')
 
 if __name__ == '__main__':
     app.run(debug=True)
