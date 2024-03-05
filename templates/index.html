@@ -4,16 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decision Table</title>
+    <title>Decission Table</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='moj_styl.css') }}">
 
 </head>
 <body>
 
-
 	<form method="post" enctype="multipart/form-data" class="form">
-		<input type="file" name="file" accept=".csv" required>
-		<button type="submit" class="button">Upload File</button>
+    <input type="file" name="file" accept=".csv" required>
+    
+    <label for="cv_splits_m1">Select number of splits in K-fold cross-validation:</label>
+    <select name="cv_splits_m1" id="cv_splits_m1">
+        <option value="5">5</option>
+        <option value="10">10</option>
+    </select>
+    
+    <button type="submit" class="button">Upload File</button>
 	</form>
 
     {% if data %}
@@ -22,7 +28,7 @@
 
 <div class="table-container">
     <div>
-        <h3>First 5 rows of your decision table:</h3>
+        <h3>First 5 rows of your decission table:</h3>
         {% if table is defined %}
 		
         <table class="table">
@@ -48,12 +54,13 @@
        {% endif %}
     </div>
 	<div>
-    <h3>Decision Table Information</h3>
+    <h3>Decission Table Information</h3>
     <p>Number of Rows: {{ num_rows }}</p>
     <p>Number of Attributes: {{ num_columns }}</p>
 	<p>Number of duplicated rows: {{ num_duplicated_rows }}</p>
 	<p>Is table inconsistent? (Yes/No): {{ inconsistent_exist }}</p>
 	<p>Number of inconsistent rows: {{ inconsistent_rows }}</p>
+	<p>Selected number of splits: {{ cv_splits_m1 }}</p>
     </div>
 </div>	
 	<p>
@@ -62,11 +69,17 @@
 	
 	<table  class="table">
 		<tr>	
-			<td colspan="2"><b>Inconsistencies removed using the 1st method:</b>	
+			<td colspan="2"><b>METHOD 1</b></td>
+		</tr>
+		<tr>	
+			<td colspan="2"><b>Inconsistencies removed by removing objects causing inconsistency (involves removing duplicates)</b></td>
 		</tr>
 		<tr>	
 			<td><b>Number of rows</b></td>
 			<td>{{ num_rows_clean_m1 }}</td>	
+		</tr>
+		<tr>	
+			<td colspan="2"><a href="{{ url_for('download_csv_m1') }}" class="button">Download CSV</a></td>
 		</tr>
 		<tr>
 			<th><b>Train-Test</b></th>
@@ -90,78 +103,36 @@
 			<th><b><center>RESULTS</center></b></th>
 		</tr>
 		<tr>
-			<td>Split 1 - depth</td>
-			<td><center>{{ depth_m1_split1 }}</center></td>
-		</tr>
-		<tr>
-			<td>Split 1 - Number of nodes</td>
-			<td><center>{{ node_m1_split1 }}</center></td>
-		</tr>
-		<tr class="split-row">
-			<td>Split 1 - Accuracy</td>
-			<td><center>{{ accuracy_m1_split1 }}</center></td>
-		</tr>	
-		<tr>
-			<td>Split 2 - depth</td>
-			<td><center>{{ depth_m1_split2 }}</center></td>
-		</tr>
-		<tr>
-			<td>Split 2 - Number of nodes</td>
-			<td><center>{{ node_m1_split2 }}</center></td>
-		</tr>
-		<tr class="split-row">
-			<td>Split 2 - Accuracy</td>
-			<td><center>{{ accuracy_m1_split2 }}</center></td>
-		</tr>			
-		<tr>
-			<td>Split 3 - depth</td>
-			<td><center>{{ depth_m1_split3 }}</center></td>
-		</tr>
-		<tr>
-			<td>Split 3 - Number of nodes</td>
-			<td><center>{{ node_m1_split3 }}</center></td>
-		</tr>
-		<tr class="split-row">
-			<td>Split 3 - Accuracy</td>
-			<td><center>{{ accuracy_m1_split3 }}</center></td>
-		</tr>	
-		<tr>
-			<td>Split 4 - depth</td>
-			<td><center>{{ depth_m1_split4 }}</center></td>
-		</tr>
-		<tr>
-			<td>Split 4 - Number of nodes</td>
-			<td><center>{{ node_m1_split4 }}</center></td>
-		</tr>
-		<tr class="split-row">
-			<td>Split 4 - Accuracy</td>
-			<td><center>{{ accuracy_m1_split4 }}</center></td>
-		</tr>
-		<tr>
-			<td>Split 5 - depth</td>
-			<td><center>{{ depth_m1_split5 }}</center></td>
-		</tr>	
-		<tr>
-			<td>Split 5 - Number of nodes</td>
-			<td><center>{{ node_m1_split5 }}</center></td>
-		</tr>
-		<tr class="split-row">
-			<td>Split 5 - Accuracy</td>
-			<td><center>{{ accuracy_m1_split5 }}</center></td>
+			<td>Average Depth for {{ cv_splits_m1 }} splits</td>
+			<td><center>{{ average_depth_m1_kf }}</center></td>
 		</tr>		
 		<tr>
-			<td>Average Accuracy for 5 splits</td>
+			<td>Average number of nodes for {{ cv_splits_m1 }} splits</td>
+			<td><center>{{ average_nodes_m1_kf }}</center></td>
+		</tr>
+		<tr>
+			<td>Average Accuracy for {{ cv_splits_m1 }} splits</td>
 			<td><center>{{ average_accuracy_m1_kf }}</center></td>
+		</tr>
+		<tr>
+			<td>Standard deviation for accuracy</td>
+			<td><center>{{ std_accuracy_m1_kf }}</center></td>
 		</tr>	
 	</table>
 
 	<table  class="table">
 		<tr>	
-			<td colspan="2"><b>Inconsistencies removed using the 2nd method:</b>	
+			<td colspan="2"><b>METHOD 2</b></td>
+		</tr>
+		<tr>	
+			<td colspan="2"><b>Inconsistencies removed using the quantitative method (involves removing duplicates)</b></td>
 		</tr>
 		<tr>	
 			<td><b>Number of rows</b></td>
 			<td>{{ num_rows_clean_m2 }}</td>	
+		</tr>
+				<tr>	
+			<td colspan="2"><a href="{{ url_for('download_csv_m2') }}" class="button">Download CSV</a></td>
 		</tr>
 		<tr>
 			<th><b>Train-Test</b></th>
@@ -184,72 +155,156 @@
 			<th><b><center>RESULTS</center></b></th>
 		</tr>
 		<tr>
-			<td>Split 1 - depth</td>
-			<td><center>{{ depth_m2_split1 }}</center></td>
-		</tr>
-		<tr>
-			<td>Split 1 - Number of nodes</td>
-			<td><center>{{ node_m2_split1 }}</center></td>
-		</tr>
-		<tr class="split-row">
-			<td>Split 1 - Accuracy</td>
-			<td><center>{{ accuracy_m2_split1 }}</center></td>
-		</tr>	
-		<tr>
-			<td>Split 2 - depth</td>
-			<td><center>{{ depth_m2_split2 }}</center></td>
-		</tr>
-		<tr>
-			<td>Split 2 - Number of nodes</td>
-			<td><center>{{ node_m2_split2 }}</center></td>
-		</tr>
-		<tr class="split-row">
-			<td>Split 2 - Accuracy</td>
-			<td><center>{{ accuracy_m2_split2 }}</center></td>
-		</tr>			
-		<tr>
-			<td>Split 3 - depth</td>
-			<td><center>{{ depth_m2_split3 }}</center></td>
-		</tr>
-		<tr>
-			<td>Split 3 - Number of nodes</td>
-			<td><center>{{ node_m2_split3 }}</center></td>
-		</tr>
-		<tr class="split-row">
-			<td>Split 3 - Accuracy</td>
-			<td><center>{{ accuracy_m2_split3 }}</center></td>
-		</tr>	
-		<tr>
-			<td>Split 4 - depth</td>
-			<td><center>{{ depth_m2_split4 }}</center></td>
-		</tr>
-		<tr>
-			<td>Split 4 - Number of nodes</td>
-			<td><center>{{ node_m2_split4 }}</center></td>
-		</tr>
-		<tr class="split-row">
-			<td>Split 4 - Accuracy</td>
-			<td><center>{{ accuracy_m2_split4 }}</center></td>
-		</tr>
-		<tr>
-			<td>Split 5 - depth</td>
-			<td><center>{{ depth_m2_split5 }}</center></td>
-		</tr>	
-		<tr>
-			<td>Split 5 - Number of nodes</td>
-			<td><center>{{ node_m2_split5 }}</center></td>
-		</tr>
-		<tr class="split-row">
-			<td>Split 5 - Accuracy</td>
-			<td><center>{{ accuracy_m2_split5 }}</center></td>
+			<td>Average Depth for {{ cv_splits_m1 }} splits</td>
+			<td><center>{{ average_depth_m2_kf }}</center></td>
 		</tr>		
 		<tr>
-			<td>Average Accuracy for 5 splits</td>
+			<td>Average number of nodes for {{ cv_splits_m1 }} splits</td>
+			<td><center>{{ average_nodes_m2_kf }}</center></td>
+		</tr>		
+		<tr>
+			<td>Average Accuracy for {{ cv_splits_m1 }} splits</td>
 			<td><center>{{ average_accuracy_m2_kf }}</center></td>
+		</tr>	
+		<tr>
+			<td>Standard deviation for accuracy</td>
+			<td><center>{{ std_accuracy_m2_kf }}</center></td>
 		</tr>	
 	</table>
 	</div>
-	
 	<p><p>
+	
+<!-- METHOD 1 -->
+
+<div class="table-container">
+    <table class="table">
+        <tr>
+            <th><b>K-fold cross validation - method 1</b></th>
+            <th><b><center>Results for each split</center></b></th>
+        </tr>
+        {% if cv_splits_m1 is defined %}
+            {% for i in range(0, cv_splits_m1) %}
+                <tr>
+                    <td>Split {{ i+1 }} - depth</td>
+                    {% if depths_m1_splits is defined %}
+                        <td><center>{{ depths_m1_splits[i] }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>Split {{ i+1 }} - Number of nodes</td>
+                    {% if nodes_m1_splits is defined %}
+                        <td><center>{{ nodes_m1_splits[i] }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+                <tr class="split-row">
+                    <td>Split {{ i+1 }} - Accuracy</td>
+                    {% if accuracies_m1_splits is defined %}
+                        <td><center>{{ accuracies_m1_splits[i]|round(2) }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% else %}
+            {% for i in range(0, 1) %}
+                <tr>
+                    <td>Split {{ i+1 }} - depth</td>
+                    {% if depths_m1_splits is defined %}
+                        <td><center>{{ depths_m1_splits[i] }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>Split {{ i+1 }} - Number of nodes</td>
+                    {% if nodes_m1_splits is defined %}
+                        <td><center>{{ nodes_m1_splits[i] }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+                <tr class="split-row">
+                    <td>Split {{ i+1 }} - Accuracy</td>
+                    {% if accuracies_m1_splits is defined %}
+                        <td><center>{{ accuracies_m1_splits[i]|round(2) }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </table>
+
+    <!-- METHOD 2 -->
+
+    <table class="table">
+        <tr>
+            <th><b>K-fold cross validation - method 2</b></th>
+            <th><b><center>Results for each split</center></b></th>
+        </tr>
+        {% if cv_splits_m1 is defined %}
+            {% for i in range(0, cv_splits_m1) %}
+                <tr>
+                    <td>Split {{ i+1 }} - depth</td>
+                    {% if depths_m2_splits is defined %}
+                        <td><center>{{ depths_m2_splits[i] }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>Split {{ i+1 }} - Number of nodes</td>
+                    {% if nodes_m2_splits is defined %}
+                        <td><center>{{ nodes_m2_splits[i] }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+                <tr class="split-row">
+                    <td>Split {{ i+1 }} - Accuracy</td>
+                    {% if accuracies_m2_splits is defined %}
+                        <td><center>{{ accuracies_m2_splits[i]|round(2) }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% else %}
+            {% for i in range(0, 1) %}
+                <tr>
+                    <td>Split {{ i+1 }} - depth</td>
+                    {% if depths_m2_splits is defined %}
+                        <td><center>{{ depths_m2_splits[i] }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>Split {{ i+1 }} - Number of nodes</td>
+                    {% if nodes_m2_splits is defined %}
+                        <td><center>{{ nodes_m2_splits[i] }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+                <tr class="split-row">
+                    <td>Split {{ i+1 }} - Accuracy</td>
+                    {% if accuracies_m2_splits is defined %}
+                        <td><center>{{ accuracies_m2_splits[i]|round(2) }}</center></td>
+                    {% else %}
+                        <td><center>N/A</center></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </table>
+</div>
+
+
+
 </body>
 </html>
