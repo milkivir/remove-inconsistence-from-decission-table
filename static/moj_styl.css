@@ -16,6 +16,14 @@ form input[type="file"] {
     margin-right: 10px; /* Add some spacing between the file input and the button */
 }
 
+form select {
+    padding: 10px; /* Adjust padding as needed */
+    border: 2px solid #4CAF50; /* Green border color */
+    border-radius: 5px; /* Rounded corners */
+    margin-right: 10px; /* Add some spacing between the dropdown and the file input */
+    margin-bottom: 40px;	
+}
+
 /* Adjust the style of the submit button within the form */
 form .button {
     padding: 10px 20px;
@@ -70,3 +78,5 @@ form .button {
     background-color: #4CAF50;
     color: white;
 }
+
+
