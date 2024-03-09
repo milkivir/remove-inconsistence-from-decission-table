@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decission Table</title>
+    <title>Removing inconsistencies from decision tables</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='moj_styl.css') }}">
 
 </head>
 <body>
 
 	<form method="post" enctype="multipart/form-data" class="form">
-    <input type="file" name="file" accept=".csv" required>
+    <input type="file" name="file" accept=".csv" required lang="en">
     
     <label for="cv_splits_m1">Select number of splits in K-fold cross-validation:</label>
     <select name="cv_splits_m1" id="cv_splits_m1">
@@ -28,7 +28,7 @@
 
 <div class="table-container">
     <div>
-        <h3>First 5 rows of your decission table:</h3>
+        <h3>First 5 rows of your decision table:</h3>
         {% if table is defined %}
 		
         <table class="table">
@@ -54,7 +54,7 @@
        {% endif %}
     </div>
 	<div>
-    <h3>Decission Table Information</h3>
+    <h3>Decision Table Information</h3>
     <p>Number of Rows: {{ num_rows }}</p>
     <p>Number of Attributes: {{ num_columns }}</p>
 	<p>Number of duplicated rows: {{ num_duplicated_rows }}</p>
